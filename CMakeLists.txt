@@ -1,0 +1,45 @@
+cmake_minimum_required(VERSION 3.20)
+project(project LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if(NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+    message(FATAL_ERROR "This project only supports x64 (64-bit) builds.")
+endif()
+
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type (Debug or Release)" FORCE)
+endif()
+
+
+add_executable(project main.cpp)
+include_directories(include/)
+target_link_libraries(project)
+
+
+if (MSVC)
+    message(STATUS "Compiler detected: MSVC")
+    target_link_libraries(project)
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    message(STATUS "Compiler detected: Clang")
+    target_link_libraries(project)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    message(STATUS "Compiler detected: MinGW (GCC)")
+    target_link_libraries(project)
+else()
+    message(WARNING "Unrecognized compiler, attempting default linking")
+    target_link_libraries(project)
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    target_compile_definitions(project PRIVATE _DEBUG)
+    if(MSVC)
+        target_compile_options(project PRIVATE /W4)
+    endif()
+else()
+    target_compile_definitions(project PRIVATE NDEBUG)
+    if(MSVC)
+        target_compile_options(project PRIVATE /O2)
+    endif()
+endif()
